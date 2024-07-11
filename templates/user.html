@@ -1,0 +1,8 @@
+{% extends 'base.html' %} {% from 'bootstrap5/form.html' import render_form %} {% block title %} user space {% endblock %} 
+
+{% block content %}
+<p>Logged in as {{ username }}</p><br>
+{{ render_form(uploadform) }} <br>
+{{ render_form(permform) }} <br>
+Uploaded Files: {{ usercontent|safe }} <br>
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends 'base.html' %} {% from 'bootstrap5/form.html' import render_form %} {% block title %} test form {% endblock %} {% block content %}
+
+<p>Register account:<br></p>
+
+{{ render_form(form) }}
+
+{{ message }}
+
+{% endblock %} 
