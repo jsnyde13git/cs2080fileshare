@@ -7,7 +7,7 @@ from wtforms import StringField, SubmitField, PasswordField
 from wtforms.validators import DataRequired, Length
 from flask import send_file, session, request
 from werkzeug.utils import secure_filename
-from os import walk #used for listing files
+from os import walk, path, makedirs
 
 import FlaskApp.loginHandling as loginHandler
 
@@ -104,7 +104,10 @@ def files():
         if form.submitupl.data and form.validate_on_submit():
             if form.upload_file.data:
                 filename = secure_filename(form.upload_file.data.filename)
-                form.upload_file.data.save("/var/www/html/FlaskApp/data/" + session["username"] + "/" + filename)
+                filepath = "/var/www/html/FlaskApp/data/" + session["username"]
+                if not path.exists(filepath):
+                    makedirs(filepath)
+                form.upload_file.data.save(filepath + "/" + filename)
 
         return render_template("user.html", username=session["username"], uploadform = form, permform=permissionForm, usercontent = getUserContent(session["username"]))
     else:
@@ -127,6 +130,8 @@ def register():
         if password == confpassword:
             loginHandler.addAccount(username, password)
             message = "registration successful"
+            session["username"] = username
+            return redirect("/files", code=302)
         else:
             message = "password and confirm password don't match"
     
