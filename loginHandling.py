@@ -15,7 +15,7 @@ class loginInfo:
 #internal func; retrieve login info with a given username
 #TODO: make this work with mysql
 def getLoginInfo(username):
-    File = open(r"/var/www/html/FlaskApp/logins.txt", "r")
+    File = open(r"/var/www/html/FlaskApp/cs2080fileshare/logins.txt", "r")
     filecontent = File.readlines()
     foundUser = False
     userLine = None
@@ -38,7 +38,7 @@ def getLoginInfo(username):
 #check if an account under this name has been created
 #TODO: make this work with mysql
 def hasAccount(username):
-    File = open(r"/var/www/html/FlaskApp/logins.txt", "r")
+    File = open(r"/var/www/html/FlaskApp/cs2080fileshare/logins.txt", "r")
     filecontent = File.readlines()
     hasAcc = False
 
@@ -54,7 +54,7 @@ def hasAccount(username):
 #TODO: make this work with mysql
 def writeLoginInfo(logInfo):
     if not hasAccount(logInfo.username):
-        File_object = open(r"/var/www/html/FlaskApp/logins.txt", "a")
+        File_object = open(r"/var/www/html/FlaskApp/cs2080fileshare/logins.txt", "a")
         File_object.write(logInfo.username + " " + logInfo.salt + " " + logInfo.passhash + "\n")  
         File_object.close()
 

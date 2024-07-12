@@ -9,14 +9,12 @@ from flask import send_file, session, request
 from werkzeug.utils import secure_filename
 from os import walk, path, makedirs
 
-import FlaskApp.loginHandling as loginHandler
+import cs2080fileshare.loginHandling as loginHandler
 
 app = Flask(__name__)
 
 bootstrap = Bootstrap5(app)
 csrf = CSRFProtect(app)
-
-url = "127.0.0.1:2222"
 
 class LoginForm(FlaskForm):
     username = StringField("username:", validators=[DataRequired(), Length(5, 40)])
@@ -40,25 +38,20 @@ class PermissionForm(FlaskForm):
 
 #TODO: Replace with mySQL implementation
 def getUserFileList(username):
-    filepath = "/var/www/html/FlaskApp/data/" + username
+    filepath = "/var/www/html/FlaskApp/cs2080fileshare/data/" + username
     filenames = next(walk(filepath), (None, None, []))[2]
     return filenames
 
 def getUserContent(username):
-    if username == "testuser":
         filelist = getUserFileList(username)
         fileHtmlList = ""
         for filename in filelist:
             fileHtmlList = fileHtmlList + '<br><a href="/download?user='+ username + '&file=' + filename + '">Download ' + filename + '</a>'
         return fileHtmlList
-    elif username == "otheruser":
-        return "other user's content"
-    else:
-        return ""
 
 #TODO: Replace with mySQL implementation
 def getFilePath(username, filename):
-    return "/var/www/html/FlaskApp/data/" + username + "/" + filename
+    return "/var/www/html/FlaskApp/cs2080fileshare/data/" + username + "/" + filename
 
 
 
@@ -104,7 +97,7 @@ def files():
         if form.submitupl.data and form.validate_on_submit():
             if form.upload_file.data:
                 filename = secure_filename(form.upload_file.data.filename)
-                filepath = "/var/www/html/FlaskApp/data/" + session["username"]
+                filepath = "/var/www/html/FlaskApp/cs2080fileshare/data/" + session["username"]
                 if not path.exists(filepath):
                     makedirs(filepath)
                 form.upload_file.data.save(filepath + "/" + filename)
@@ -151,9 +144,14 @@ def download():
     else:
         return "<p>ERROR: No access</p>"
 
+
+@app.route("/test", methods=["GET", "POST"])
+def test():
+    return render_template("wordpressthing.html")
+
 def hello():
     return "<p>hello world</p>"
 if __name__ == "__main__":
-    app.run()
+    app.run(ssl_context='adhoc')
 
 
