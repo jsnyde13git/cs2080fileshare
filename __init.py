@@ -1,6 +1,10 @@
-#!/bin/usr/python
+#!/var/www/html/FlaskApp/cs2080fileshare/.venv/bin python
+import sys
+print("prefix = " + sys.prefix)
+print("base_prefix = " + sys.base_prefix)
+
 from flask import Flask, render_template, redirect, url_for
-from flask_bootstrap import Bootstrap5
+from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm, CSRFProtect
 from flask_wtf.file import FileField
 from wtforms import StringField, SubmitField, PasswordField
@@ -13,8 +17,17 @@ import cs2080fileshare.loginHandling as loginHandler
 
 app = Flask(__name__)
 
-bootstrap = Bootstrap5(app)
+bootstrap = Bootstrap(app)
 csrf = CSRFProtect(app)
+
+#SSL Certificate code
+
+#@app.route("/")
+#def hello():
+#    return "Hello World!"
+
+if __name__ == "__main__":
+    app.run(debug = True, ssl_context=('/etc/apache2/ssl/apache-selfsigned.crt', '/etc/apache2/ssl/apache-selfsigned.key'))
 
 class LoginForm(FlaskForm):
     username = StringField("username:", validators=[DataRequired(), Length(5, 40)])
@@ -153,5 +166,3 @@ def hello():
     return "<p>hello world</p>"
 if __name__ == "__main__":
     app.run(ssl_context='adhoc')
-
-
