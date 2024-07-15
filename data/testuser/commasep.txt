@@ -1,3 +1,0 @@
-field1,field2,field3
-deez,nuts
-some,more,data,waow
