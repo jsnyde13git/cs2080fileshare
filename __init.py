@@ -4,7 +4,7 @@ from flask_bootstrap import Bootstrap5
 from flask_wtf import FlaskForm, CSRFProtect
 from flask_wtf.file import FileField
 from wtforms import StringField, SubmitField, PasswordField
-from wtforms.validators import DataRequired, Length
+from wtforms.validators import DataRequired, Length, Regexp
 from flask import send_file, session, request
 from werkzeug.utils import secure_filename
 from os import walk, path, makedirs
@@ -21,13 +21,17 @@ if __name__ == "__main__":
 
 #form for logging in
 class LoginForm(FlaskForm):
-    username = StringField("username:", validators=[DataRequired(), Length(5, 40)])
+    #checks to ensure username is input, is between 5 and 40 characters, and uses only alphanumeric characters or underscores
+    username = StringField("username:", validators=[DataRequired(), Length(5, 40), Regexp("^[a-zA-Z0-9_]*$",0,"Usernames may only use alphanumeric characters or underscores")])
+    #checks to ensure password is between 5 and 40 characters
     password = PasswordField("password:", validators=[DataRequired(), Length(5,40)])
     submit = SubmitField('Submit')
 
 #form to register an account
 class RegisterForm(FlaskForm):
-    username = StringField("username:", validators=[DataRequired(), Length(5,40)])
+    #checks to ensure username is input, is between 5 and 40 characters, and uses only alphanumeric characters or underscores
+    username = StringField("username:", validators=[DataRequired(), Length(5,40), Regexp("^[a-zA-Z0-9_]*$",0,"Usernames may only use alphanumeric characters or underscores")])
+    #checks to ensure password is between 5 and 40 characters
     password = PasswordField("password:", validators=[DataRequired(), Length(5,40)])
     confirmpassword = PasswordField("confirm password:", validators=[DataRequired(), Length(5,40)])
     submit = SubmitField('Submit')
@@ -98,6 +102,9 @@ def files():
 
     #check to ensure there's a logged in user, then display content relevant to user
     if "username" in session and session["username"]:
+        #autofill in the current allowed users list
+        if request.method == "GET":
+            permissionForm.allowedUsers.data = loginHandler.getAllowedUsersAsString(session["username"])
         
         #file upload
         if form.submitupl.data and form.validate_on_submit():
@@ -113,6 +120,10 @@ def files():
 
                 #save the file
                 form.upload_file.data.save(filepath + "/" + filename)
+
+        #change user permissions
+        if permissionForm.submit.data and permissionForm.validate_on_submit():
+            loginHandler.writeAllowedUsers(session["username"], permissionForm.allowedUsers.data)
 
         #display the user's page, including list of file download links (via getUserContent), the upload form, and the permissions form
         return render_template("user.html", username=session["username"], uploadform = form, permform=permissionForm, usercontent = getUserContent(session["username"]))
@@ -166,19 +177,25 @@ def download():
     #get username from url arguments
     username = request.args.get("user", None)
 
-    #check if user is logged in or an allowed user
-    if username == session["username"]:
+    if "username" in session:
+        #check if user is logged in or an allowed user
+        print(str(loginHandler.getAllowedUsersAsList(username)))
+        print(loginHandler.getAllowedUsersAsString(username))
+        if username == session["username"] or session["username"] in loginHandler.getAllowedUsersAsList(username):
         
-        #if the user is logged in: get the filename
-        filename = request.args.get("file", None)
-        #check that file name has been specified, and that it's a valid file on the user's account
-        if filename and filename in getUserFileList(username):
-            #get the filepath of the file, and send it to the user for download
-            filepath = getFilePath(username, filename)
-            return send_file(filepath, as_attachment=True)
+            #if the user is logged in: get the filename
+            filename = request.args.get("file", None)
+            #check that file name has been specified, and that it's a valid file on the user's account
+            if filename and filename in getUserFileList(username):
+                #get the filepath of the file, and send it to the user for download
+                filepath = getFilePath(username, filename)
+                return send_file(filepath, as_attachment=True)
+            else:
+                #if filename is blank, display error
+                return "<p>ERROR: Invalid filename</p>"
         else:
-            #if filename is blank, display error
-            return "<p>ERROR: Invalid filename</p>"
+            #if user is not owner or allowed, display error
+            return "<p>ERROR: No access</p>"
     else:
-        #if user is not logged in or allowed, display error
-        return "<p>ERROR: No access</p>"
+        #if user is not logged in, display error
+        return "<p>ERROR: Not logged in</p>"
