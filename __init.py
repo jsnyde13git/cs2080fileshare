@@ -43,7 +43,8 @@ class UploadForm(FlaskForm):
 
 #form to edit user permissions
 class PermissionForm(FlaskForm):
-    allowedUsers = StringField("users allowed to download:")
+    #checks to ensure allowed users box uses only alphanumeric characters, underscores, and commas
+    allowedUsers = StringField("users allowed to download (comma-separated list):", validators=[Regexp("^[a-zA-Z0-9_,]*$",0,"Usernames may only use alphanumeric characters or underscores")])
     submit = SubmitField("Submit")
 
 
