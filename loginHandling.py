@@ -27,8 +27,10 @@ def getAllowedUsersAsString(username):
 
 def getAllowedUsersAsList(username):
     logInfo = getLoginInfo(username)
-    return logInfo.allowedusers.split(",")
-
+    if not logInfo is None:
+        return logInfo.allowedusers.split(",")
+    else:
+        return []
 #update a user's allowed users
 def writeAllowedUsers(username, userList):
     with open(loginFile, "r") as f:

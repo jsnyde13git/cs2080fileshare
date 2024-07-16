@@ -180,8 +180,6 @@ def download():
 
     if "username" in session:
         #check if user is logged in or an allowed user
-        print(str(loginHandler.getAllowedUsersAsList(username)))
-        print(loginHandler.getAllowedUsersAsString(username))
         if username == session["username"] or session["username"] in loginHandler.getAllowedUsersAsList(username):
         
             #if the user is logged in: get the filename
